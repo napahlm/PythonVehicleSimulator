@@ -120,7 +120,7 @@ class supply:
         K = np.diag([2.4, 2.4, 17.6, 17.6])
         T = np.array(
             [[0, 0, 1, 1], [1, 1, 0, 0], [30, 22, -self.L / 2, self.L / 2]], float
-        )
+        ) # TODO: Isn't "self.L/2" the lx and not ly in this case for main propeller?
         self.B = T @ K
 
         # Tbis = np.diag( [1, 1, 1 / self.L],float)
