@@ -10,6 +10,7 @@ URL: https://www.fossen.biz/wiley
     
 Author:     Thor I. Fossen
 """
+
 import os
 import webbrowser
 import matplotlib.pyplot as plt
@@ -30,6 +31,7 @@ browser = 'safari'                  # browser for visualization of animated GIF
 ###############################################################################
 # Vehicle constructors
 ###############################################################################
+
 printSimInfo() 
 
 """
@@ -58,7 +60,8 @@ match no:   #  The match statement requires Python >= 3.10
     case  '7': vehicle = supply('DPcontrol',4.0,4.0,100.0,0.5,20.0)
     case  '8': vehicle = tanker('headingAutopilot',-20,0.5,150,20,80)
     case  '9': vehicle = remus100('depthHeadingAutopilot',30,50,1525,0.5,170)    
-    case '10': vehicle = testvessel('DPcontrol',4.0,4.0,100.0,0.5,20.0) 
+    case '10': vehicle = testvessel('DPcontrol',4.0,4.0,100.0,0.5,20.0)     
+    case '11': vehicle = testvessel() # Faster step input tester
     case _: print('Error: Not a valid simulator option'), sys.exit()
 
 printVehicleinfo(vehicle, sampleTime, N)
@@ -66,6 +69,7 @@ printVehicleinfo(vehicle, sampleTime, N)
 ###############################################################################
 # Main simulation loop 
 ###############################################################################
+
 def main():    
     
     [simTime, simData] = simulate(N, sampleTime, vehicle)

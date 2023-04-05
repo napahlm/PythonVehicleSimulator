@@ -31,7 +31,7 @@ class testvessel:
 
     def __init__(
         self,
-        controlSystem="stepInput",
+        controlSystem = "stepInput",
         r_x = 0,
         r_y = 0,
         r_n = 0,
@@ -46,12 +46,9 @@ class testvessel:
         if controlSystem == "DPcontrol":
             self.controlDescription = (
                 "Nonlinear DP control (x_d, y_d, psi_d) = ("
-                + str(r_x)
-                + " m, "
-                + str(r_y)
-                + " m, "
-                + str(r_n)
-                + " deg)"
+                + str(r_x) + " m, "
+                + str(r_y) + " m, "
+                + str(r_n) + " deg)"
             )
         else:
             self.controlDescription = "Step inputs for n = [n1, n2, n3, n4]"
@@ -137,7 +134,7 @@ class testvessel:
 
         # 6 DOF ship model
         nu_dot = np.array([nu3_dot[0], nu3_dot[1], 0, 0, 0, nu3_dot[2]])
-        n_dot = (u_control - u_actual) / self.T_n
+        n_dot  = (u_control - u_actual) / self.T_n
 
         # Forward Euler Integration
         nu = nu + sampleTime * nu_dot
@@ -170,11 +167,12 @@ class testvessel:
     
     def controlAllocationQP(self, tau3):
         constraints = {'type': 'eq', 'fun': self.constraintQP, 'args': (tau3,)}
-        x0 = np.zeros(4)
+        x0 = np.zeros(4) # TODO: Use warm-start to speed up solution
         res = minimize(self.objectiveQP,
                        x0,
                        constraints=constraints)
         u_alloc = res.x
+        
         return u_alloc
 
     def DPcontrol(self, eta, nu, sampleTime):
