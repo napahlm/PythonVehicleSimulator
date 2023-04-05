@@ -3,12 +3,15 @@
 
 """
 testvessel.py
-    A modified copy of supply.py
-    
-    The purpose is to test other thrust allocation methods.
+    This is a modified model of the supply vessel detailed in supply.py.
+    Changes:
+        1) Small changes to ship model parameters. Most notably the position of the main thrusters.
+        2) The thrust allocation method is changed. Distributed pseudoinverse has been swapped out for a quadratic programming method using scipy.optimize.minimize.
+           At this moment it is way slower than pseudoinverse, but changes the results for the better. Change controlAllocation() for controlAllocationQP() to test.
 """
 
 import numpy as np
+from scipy.optimize import minimize
 from python_vehicle_simulator.lib.control import DPpolePlacement
 from python_vehicle_simulator.lib.gnc import sat
 
@@ -79,11 +82,11 @@ class testvessel:
         self.dimU = len(self.controls)
 
         # Propulsion configuration
-        Ke = np.diag([2.4, 2.4, 17.6, 17.6])
-        Te = np.array([[ 0,  0,         1,        1],
+        self.Ke = np.diag([2.4, 2.4, 17.6, 17.6])
+        self.Te = np.array([[ 0,  0,         1,        1],
                        [ 1,  1,         0,        0],
                        [30, 22, -self.W/2, self.W/2]], float)
-        self.B = Te @ Ke
+        self.B = self.Te @ self.Ke
 
         # 3-DOF model matrices - bis scaling (Fossen 2021, App. D)
         Tbis_inv = np.diag([1.0, 1.0, self.L])
@@ -153,6 +156,26 @@ class testvessel:
         u_alloc = np.matmul(B_pseudoInv, tau3)
 
         return u_alloc
+    
+    def objectiveQP(self, x):
+        # x: [u1, u2, u3, u4]
+        weights = np.diag([10, 10, 1, 1]) # prioritize tunnel thrusters
+        f = np.dot(np.dot(x, weights), x)
+        return f
+    
+    def constraintQP(self, x, tau3):
+        # x: [u1, u2, u3, u4]
+        g = tau3 - np.dot(self.Te, x) # = 0
+        return g
+    
+    def controlAllocationQP(self, tau3):
+        constraints = {'type': 'eq', 'fun': self.constraintQP, 'args': (tau3,)}
+        x0 = np.zeros(4)
+        res = minimize(self.objectiveQP,
+                       x0,
+                       constraints=constraints)
+        u_alloc = res.x
+        return u_alloc
 
     def DPcontrol(self, eta, nu, sampleTime):
 
@@ -173,8 +196,8 @@ class testvessel:
             self.ref,
             sampleTime,
         )
-
-        u_alloc = self.controlAllocation(tau3)
+        
+        u_alloc = self.controlAllocationQP(tau3)
 
         n = np.zeros(self.dimU)
         for i in range(0, self.dimU):

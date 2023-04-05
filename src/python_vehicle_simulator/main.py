@@ -18,7 +18,7 @@ from python_vehicle_simulator.lib import *
 
 # Simulation parameters: 
 sampleTime = 0.02                   # sample time [seconds]
-N = 20000                           # number of samples
+N = 10000                           # number of samples
 
 # 3D plot and animation parameters where browser = {firefox,chrome,safari,etc.}
 numDataPoints = 50                  # number of 3D data points
